@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            background-color: white;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .column {
+            flex: 1;
+            border: 1px solid;
+            padding: 10px;
+        }
+        .task {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .buttons {
+            display: flex;
+            gap: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        function ToDoApp() {
+            const [tasks, setTasks] = useState([]); 
+            const taskIdCounter = useRef(0); 
+            const newTaskInput = useRef(null); 
+
+            const addTask = () => {
+                const taskText = newTaskInput.current.value.trim();
+                if (taskText) {
+                    setTasks((prevTasks) => [
+                        ...prevTasks,
+                        { id: taskIdCounter.current++, text: taskText, isDone: false },
+                    ]);
+                    newTaskInput.current.value = '';
+                }
+            };
+
+            const toggleTaskState = (id) => {
+                setTasks((prevTasks) =>
+                    prevTasks.map((task) =>
+                        task.id === id ? { ...task, isDone: !task.isDone } : task
+                    )
+                );
+            };
+
+            const deleteTask = (id) => {
+                setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
+            };
+
+            return (
+                <div style={{ padding: '20px' }}>
+                    <h1>To do List</h1>
+                    <div>
+                        <input type="text" ref={newTaskInput} />
+                        <button onClick={addTask}>დავალების დამატება</button>
+                    </div>
+                    <div className="container">
+                        {}
+                        <div className="column">
+                            <h2>შესასრულებელი</h2>
+                            {tasks
+                                .filter((task) => !task.isDone)
+                                .map((task) => (
+                                    <Task
+                                        key={task.id}
+                                        task={task}
+                                        onToggle={() => toggleTaskState(task.id)}
+                                        onDelete={() => deleteTask(task.id)}
+                                    />
+                                ))}
+                        </div>
+
+                        {}
+                        <div className="column">
+                            <h2>შესრულებული</h2>
+                            {tasks
+                                .filter((task) => task.isDone)
+                                .map((task) => (
+                                    <Task
+                                        key={task.id}
+                                        task={task}
+                                        onToggle={() => toggleTaskState(task.id)}
+                                        onDelete={() => deleteTask(task.id)}
+                                    />
+                                ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function Task({ task, onToggle, onDelete }) {
+            return (
+                <div className="task">
+                    <span>{task.text}</span>
+                    <div className="buttons">
+                        <button onClick={onToggle}>
+                            {task.isDone ? 'დაბრუნება' : 'დასრულება'}
+                        </button>
+                        <button onClick={onDelete}>წაშლა</button>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<ToDoApp />, document.getElementById('root'));
+    </script>
+</body>
+</html>
